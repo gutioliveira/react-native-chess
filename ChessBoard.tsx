@@ -23,8 +23,8 @@ interface PieceInterface {
 }
 
 interface Position {
-  x: number;
-  y: number;
+  i: number;
+  j: number;
 }
 
 class Piece {
@@ -342,34 +342,38 @@ class Pawn extends Piece {
 
   pawnMovement(chessBoard: Board): Array<any> {
     const direction = this.color === "white" ? -1 : 1;
-    const { x, y } = this.position;
-    const firstMove = this.color === "white" ? y === 6 : y === 1;
+    const { i, j } = this.position;
+    const firstMove = this.color === "white" ? i === 6 : i === 1;
     const positions = [];
+    console.log(`firstMove ${firstMove}`);
     try {
-      if (chessBoard[x][y + direction] === null) {
-        positions.push({ x, y: y + direction });
+      console.log(`${i + direction}, ${j}`);
+      if (chessBoard[i + direction][j] === null) {
+        positions.push({ i: i + direction, j: j });
       }
-      if (firstMove && chessBoard[x][y + 2 * direction] === null) {
-        positions.push({ x, y: y + 2 * direction });
+      if (firstMove && chessBoard[i + 2 * direction][j] === null) {
+        positions.push({ i: i + 2 * direction, j: j });
       }
     } catch {}
 
     try {
       if (
-        chessBoard[x + 1][y + direction] &&
-        chessBoard[x + 1][y + direction].color !== this.color
+        chessBoard[i + direction][j + 1] &&
+        chessBoard[i + direction][j + 1].color !== this.color
       ) {
-        positions.push({ x: x + 1, y: y + direction });
+        positions.push({ j: j + 1, i: i + direction });
       }
     } catch {}
+
     try {
       if (
-        chessBoard[x - 1][y + direction] &&
-        chessBoard[x - 1][y + direction].color !== this.color
+        chessBoard[i + direction][j - 1] &&
+        chessBoard[i + direction][j - 1].color !== this.color
       ) {
-        positions.push({ x: x - 1, y: y + direction });
+        positions.push({ j: j - 1, i: i + direction });
       }
     } catch {}
+
     return positions;
   }
 
@@ -388,14 +392,14 @@ const ChessBoard = () => {
     const secondRow = team === "white" ? 7 : 0;
     for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
       chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-        x: firstRow,
-        y: i,
+        i: firstRow,
+        j: i,
       });
     }
     PIECES_ORDER.forEach((item, index) => {
       chessBoard[secondRow][index] = pieceFactory(item, team, {
-        x: secondRow,
-        y: index,
+        i: secondRow,
+        j: index,
       });
     });
   };
@@ -413,39 +417,42 @@ const ChessBoard = () => {
   console.log(JSON.stringify(chessBoard));
 
   const onPiecePress = (piece: Piece) => {
-    console.log(
-      `MOVEMENTS ${piece.name}(${piece.position.y}, ${piece.position.x}) - ${piece.color}: `,
-      JSON.stringify(piece.getAvailableMovements(chessBoard))
-    );
+    if (piece) {
+      console.log(
+        `MOVEMENTS ${piece.name}(${piece.position.i}, ${piece.position.j}) - ${piece.color}: `,
+        JSON.stringify(piece.getAvailableMovements(chessBoard))
+      );
+    }
   };
 
   return (
     <View style={styles.container}>
-      {chessBoard.map((item: any, y: number) => {
-        let color = y % 2;
+      {chessBoard.map((item: any, i: number) => {
+        let color = i % 2;
         return (
           <View style={{ flexDirection: "row" }}>
-            {item.map((cell: Piece, x: number) => {
+            {item.map((cell: Piece, j: number) => {
               // console.log(`CELL ${JSON.stringify(cell)}`);
+              let backgroundColor =
+                j === 0 ? COLORS[color] : COLORS[(color + j) % 2];
+
+              if (i === 2 && j === 4) {
+                backgroundColor = "green";
+              }
               return (
-                <View
-                  style={{
-                    width: width / ROW_COLUMN_SIZE,
-                    height: width / ROW_COLUMN_SIZE,
-                    backgroundColor:
-                      x === 0 ? COLORS[color] : COLORS[(color + x) % 2],
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {cell && (
-                    <TouchableWithoutFeedback
-                      onPress={() => onPiecePress(cell)}
-                    >
-                      <Text style={{ color: "red" }}>{cell.name}</Text>
-                    </TouchableWithoutFeedback>
-                  )}
-                </View>
+                <TouchableWithoutFeedback onPress={() => onPiecePress(cell)}>
+                  <View
+                    style={{
+                      width: width / ROW_COLUMN_SIZE,
+                      height: width / ROW_COLUMN_SIZE,
+                      backgroundColor,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {cell && <Text style={{ color: "red" }}>{cell.name}</Text>}
+                  </View>
+                </TouchableWithoutFeedback>
               );
             })}
           </View>
