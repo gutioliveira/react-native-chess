@@ -42,14 +42,14 @@ class Piece {
     const positions = [];
     try {
       for (
-        let x = this.position.x + 1;
-        x < (limited ? this.position.x + 2 : ROW_COLUMN_SIZE);
-        x++
+        let j = this.position.j + 1;
+        j < (limited ? this.position.j + 2 : ROW_COLUMN_SIZE);
+        j++
       ) {
-        if (chessBoard[x][this.position.y] === null) {
-          positions.push({ x, y: this.position.y });
-        } else if (chessBoard[x][this.position.y].color !== this.color) {
-          positions.push({ x, y: this.position.y });
+        if (chessBoard[this.position.i][j] === null) {
+          positions.push({ j, i: this.position.i });
+        } else if (chessBoard[this.position.i][j].color !== this.color) {
+          positions.push({ j, i: this.position.i });
           break;
         } else {
           break;
@@ -58,14 +58,14 @@ class Piece {
     } catch (e) {}
     try {
       for (
-        let x = this.position.x - 1;
-        x >= (limited ? this.position.x - 1 : 0);
-        x--
+        let j = this.position.j - 1;
+        j >= (limited ? this.position.j - 1 : 0);
+        j--
       ) {
-        if (chessBoard[x][this.position.y] === null) {
-          positions.push({ x, y: this.position.y });
-        } else if (chessBoard[x][this.position.y].color !== this.color) {
-          positions.push({ x, y: this.position.y });
+        if (chessBoard[this.position.i][j] === null) {
+          positions.push({ j, i: this.position.i });
+        } else if (chessBoard[this.position.i][j].color !== this.color) {
+          positions.push({ j, i: this.position.i });
           break;
         } else {
           break;
@@ -80,14 +80,14 @@ class Piece {
     const positions = [];
     try {
       for (
-        let y = this.position.y + 1;
-        y < (limited ? this.position.y + 2 : ROW_COLUMN_SIZE);
-        y++
+        let i = this.position.i + 1;
+        i < (limited ? this.position.i + 2 : ROW_COLUMN_SIZE);
+        i++
       ) {
-        if (chessBoard[this.position.x][y] === null) {
-          positions.push({ x: this.position.x, y });
-        } else if (chessBoard[this.position.x][y].color !== this.color) {
-          positions.push({ x: this.position.x, y });
+        if (chessBoard[i][this.position.j] === null) {
+          positions.push({ j: this.position.j, i });
+        } else if (chessBoard[i][this.position.j].color !== this.color) {
+          positions.push({ j: this.position.j, i });
           break;
         } else {
           break;
@@ -96,14 +96,14 @@ class Piece {
     } catch (e) {}
     try {
       for (
-        let y = this.position.y - 1;
-        y >= (limited ? this.position.y - 1 : 0);
-        y--
+        let i = this.position.i - 1;
+        i >= (limited ? this.position.i - 1 : 0);
+        i--
       ) {
-        if (chessBoard[this.position.x][y] === null) {
-          positions.push({ x: this.position.x, y });
-        } else if (chessBoard[this.position.x][y].color !== this.color) {
-          positions.push({ x: this.position.x, y });
+        if (chessBoard[i][this.position.j] === null) {
+          positions.push({ j: this.position.j, i });
+        } else if (chessBoard[i][this.position.j].color !== this.color) {
+          positions.push({ j: this.position.j, i });
           break;
         } else {
           break;
@@ -117,71 +117,71 @@ class Piece {
   diagonalMovements(chessBoard: Board, limited = false) {
     const positions = [];
     try {
-      let { x, y } = this.position;
+      let { j, i } = this.position;
 
       do {
-        x++;
-        y++;
-        if (chessBoard[x][y] === null) {
-          positions.push({ x, y });
-        } else if (chessBoard[x][y].color !== this.color) {
-          positions.push({ x, y });
+        j++;
+        i++;
+        if (chessBoard[i][j] === null) {
+          positions.push({ j, i });
+        } else if (chessBoard[i][j].color !== this.color) {
+          positions.push({ j, i });
           break;
         } else {
           break;
         }
-      } while (x < ROW_COLUMN_SIZE && y < ROW_COLUMN_SIZE && !limited);
+      } while (j < ROW_COLUMN_SIZE && i < ROW_COLUMN_SIZE && !limited);
     } catch (e) {}
 
     try {
-      let { x, y } = this.position;
+      let { j, i } = this.position;
 
       do {
-        x--;
-        y--;
-        if (chessBoard[x][y] === null) {
-          positions.push({ x, y });
-        } else if (chessBoard[x][y].color !== this.color) {
-          positions.push({ x, y });
+        j--;
+        i--;
+        if (chessBoard[i][j] === null) {
+          positions.push({ j, i });
+        } else if (chessBoard[i][j].color !== this.color) {
+          positions.push({ j, i });
           break;
         } else {
           break;
         }
-      } while (x > 0 && y > 0 && !limited);
+      } while (j > 0 && i > 0 && !limited);
     } catch (e) {}
 
     try {
-      let { x, y } = this.position;
+      let { j, i } = this.position;
 
       do {
-        x++;
-        y--;
-        if (chessBoard[x][y] === null) {
-          positions.push({ x, y });
-        } else if (chessBoard[x][y].color !== this.color) {
-          positions.push({ x, y });
+        j++;
+        i--;
+        if (chessBoard[i][j] === null) {
+          positions.push({ j, i });
+        } else if (chessBoard[i][j].color !== this.color) {
+          positions.push({ j, i });
           break;
         } else {
           break;
         }
-      } while (x < ROW_COLUMN_SIZE && y > 0 && !limited);
+      } while (j < ROW_COLUMN_SIZE && i > 0 && !limited);
     } catch (e) {}
 
     try {
-      let { x, y } = this.position;
+      let { j, i } = this.position;
 
       do {
-        x--;
-        y++;
-        if (chessBoard[x][y] === null) {
-          positions.push({ x, y });
-        } else if (chessBoard[x][y].color !== this.color) {
-          positions.push({ x, y });
+        j--;
+        i++;
+        if (chessBoard[i][j] === null) {
+          positions.push({ j, i });
+        } else if (chessBoard[i][j].color !== this.color) {
+          positions.push({ j, i });
           break;
         } else {
           break;
         }
-      } while (x > 0 && y < ROW_COLUMN_SIZE && !limited);
+      } while (j > 0 && i < ROW_COLUMN_SIZE && !limited);
     } catch (e) {}
 
     return positions;
@@ -393,12 +393,12 @@ const ChessBoard = () => {
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
     const secondRow = team === "white" ? 7 : 0;
-    for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
-      chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-        i: firstRow,
-        j: i,
-      });
-    }
+    // for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+    //   chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
+    //     i: firstRow,
+    //     j: i,
+    //   });
+    // }
     PIECES_ORDER.forEach((item, index) => {
       chessBoard[secondRow][index] = pieceFactory(item, team, {
         i: secondRow,
