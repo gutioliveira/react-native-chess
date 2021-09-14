@@ -388,6 +388,7 @@ const ChessBoard = () => {
   const [chessBoard, setChessBoard] = useState<Board>([]);
   const [greenPositions, setGreenPositions] = useState<any>({});
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
+  const [turn, setTurn] = useState(0);
 
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
@@ -418,6 +419,11 @@ const ChessBoard = () => {
 
   console.log(JSON.stringify(chessBoard));
 
+  const cancelMovement = () => {
+    setCurrentPiece(null);
+    setGreenPositions({});
+  };
+
   const onPiecePress = (i: string, j: string) => {
     console.log(
       `I = ${i} J = ${j}`,
@@ -434,16 +440,20 @@ const ChessBoard = () => {
         currentPiece.position.i = parseInt(i);
         currentPiece.position.j = parseInt(j);
         chessBoardCopy[parseInt(i)][parseInt(j)] = currentPiece;
+        setTurn(turn + 1);
         console.log(`chessBoardCopy`, JSON.stringify(chessBoardCopy));
-        setCurrentPiece(null);
-        setGreenPositions({});
+        cancelMovement();
         setChessBoard(chessBoardCopy);
+      } else {
+        cancelMovement();
       }
-    } catch (e) {}
+    } catch (e) {
+      cancelMovement();
+    }
   };
 
   const onLongPress = (piece: Piece) => {
-    if (piece) {
+    if (piece && COLORS[turn % 2] === piece.color) {
       const gPositions = piece.getAvailableMovements(chessBoard);
       setGreenPositions(
         gPositions.reduce((acc, currentValue, index, array) => {
@@ -459,45 +469,70 @@ const ChessBoard = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {chessBoard.map((item: any, i: number) => {
-        let color = i % 2;
-        return (
-          <View style={{ flexDirection: "row" }}>
-            {item.map((cell: Piece, j: number) => {
-              // console.log(`CELL ${JSON.stringify(cell)}`);
-              let backgroundColor =
-                j === 0 ? COLORS[color] : COLORS[(color + j) % 2];
+    <>
+      {
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text>Current Turn</Text>
+          <View
+            style={{
+              height: 10,
+              width: 10,
+              backgroundColor: COLORS[turn % 2],
+              borderWidth: 1,
+              marginLeft: 5,
+            }}
+          />
+        </View>
+      }
+      <View style={styles.container}>
+        {chessBoard.map((item: any, i: number) => {
+          let color = i % 2;
+          return (
+            <View style={{ flexDirection: "row" }}>
+              {item.map((cell: Piece, j: number) => {
+                // console.log(`CELL ${JSON.stringify(cell)}`);
+                let backgroundColor =
+                  j === 0 ? COLORS[color] : COLORS[(color + j) % 2];
 
-              try {
-                if (greenPositions[i][j]) {
-                  backgroundColor = "green";
-                }
-              } catch (e) {}
+                try {
+                  if (greenPositions[i][j]) {
+                    backgroundColor = "green";
+                  }
+                } catch (e) {}
 
-              return (
-                <TouchableWithoutFeedback
-                  onLongPress={() => onLongPress(cell)}
-                  onPress={() => onPiecePress(i.toString(), j.toString())}
-                >
-                  <View
-                    style={{
-                      width: width / ROW_COLUMN_SIZE,
-                      height: width / ROW_COLUMN_SIZE,
-                      backgroundColor,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                return (
+                  <TouchableWithoutFeedback
+                    onLongPress={() => onLongPress(cell)}
+                    onPress={() => onPiecePress(i.toString(), j.toString())}
                   >
-                    {cell && <Text style={{ color: "red" }}>{cell.name}</Text>}
-                  </View>
-                </TouchableWithoutFeedback>
-              );
-            })}
-          </View>
-        );
-      })}
-    </View>
+                    <View
+                      style={{
+                        width: width / ROW_COLUMN_SIZE,
+                        height: width / ROW_COLUMN_SIZE,
+                        backgroundColor,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {cell && (
+                        <Text
+                          style={{
+                            backgroundColor: cell.color,
+                            color: cell.color === "black" ? "white" : "black",
+                          }}
+                        >
+                          {cell.name}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableWithoutFeedback>
+                );
+              })}
+            </View>
+          );
+        })}
+      </View>
+    </>
   );
 };
 
