@@ -303,25 +303,25 @@ class Knight extends Piece {
   knightMovement(chessBoard: Board): Array<any> {
     const positions: Array<any> = [];
     const possiblePositions = [
-      { x: 2, y: 1 },
-      { x: 1, y: 2 },
-      { x: -1, y: 2 },
-      { x: -2, y: 1 },
-      { x: -2, y: -1 },
-      { x: -1, y: -2 },
-      { x: 1, y: -2 },
-      { x: 2, y: -1 },
+      { i: 2, j: 1 },
+      { i: 1, j: 2 },
+      { i: -1, j: 2 },
+      { i: -2, j: 1 },
+      { i: -2, j: -1 },
+      { i: -1, j: -2 },
+      { i: 1, j: -2 },
+      { i: 2, j: -1 },
     ];
 
     possiblePositions.forEach((position) => {
-      let { x, y } = this.position;
-      x += position.x;
-      y += position.y;
+      let { i, j } = this.position;
+      i += position.i;
+      j += position.j;
       try {
-        if (chessBoard[x][y] === null) {
-          positions.push({ x, y });
-        } else if (chessBoard[x][y].color !== this.color) {
-          positions.push({ x, y });
+        if (chessBoard[i][j] === null) {
+          positions.push({ i, j });
+        } else if (chessBoard[i][j].color !== this.color) {
+          positions.push({ i, j });
         }
       } catch (e) {}
     });
@@ -386,6 +386,8 @@ const COLORS = ["white", "black"];
 
 const ChessBoard = () => {
   const [chessBoard, setChessBoard] = useState<Board>([]);
+  const [greenPositions, setGreenPositions] = useState<any>({});
+  const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
 
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
@@ -416,12 +418,43 @@ const ChessBoard = () => {
 
   console.log(JSON.stringify(chessBoard));
 
-  const onPiecePress = (piece: Piece) => {
+  const onPiecePress = (i: string, j: string) => {
+    console.log(
+      `I = ${i} J = ${j}`,
+      JSON.stringify(currentPiece),
+      JSON.stringify(greenPositions)
+    );
+    try {
+      if (currentPiece && greenPositions[i][j]) {
+        console.log(`caiu123`);
+        const I = currentPiece.position.i;
+        const J = currentPiece.position.j;
+        const chessBoardCopy = Array.from(chessBoard);
+        chessBoardCopy[I][J] = null;
+        currentPiece.position.i = parseInt(i);
+        currentPiece.position.j = parseInt(j);
+        chessBoardCopy[parseInt(i)][parseInt(j)] = currentPiece;
+        console.log(`chessBoardCopy`, JSON.stringify(chessBoardCopy));
+        setCurrentPiece(null);
+        setGreenPositions({});
+        setChessBoard(chessBoardCopy);
+      }
+    } catch (e) {}
+  };
+
+  const onLongPress = (piece: Piece) => {
     if (piece) {
-      console.log(
-        `MOVEMENTS ${piece.name}(${piece.position.i}, ${piece.position.j}) - ${piece.color}: `,
-        JSON.stringify(piece.getAvailableMovements(chessBoard))
+      const gPositions = piece.getAvailableMovements(chessBoard);
+      setGreenPositions(
+        gPositions.reduce((acc, currentValue, index, array) => {
+          if (!acc[currentValue.i]) {
+            acc[currentValue.i] = {};
+          }
+          acc[currentValue.i][currentValue.j] = true;
+          return acc;
+        }, {})
       );
+      setCurrentPiece(piece);
     }
   };
 
@@ -436,11 +469,17 @@ const ChessBoard = () => {
               let backgroundColor =
                 j === 0 ? COLORS[color] : COLORS[(color + j) % 2];
 
-              if (i === 2 && j === 4) {
-                backgroundColor = "green";
-              }
+              try {
+                if (greenPositions[i][j]) {
+                  backgroundColor = "green";
+                }
+              } catch (e) {}
+
               return (
-                <TouchableWithoutFeedback onPress={() => onPiecePress(cell)}>
+                <TouchableWithoutFeedback
+                  onLongPress={() => onLongPress(cell)}
+                  onPress={() => onPiecePress(i.toString(), j.toString())}
+                >
                   <View
                     style={{
                       width: width / ROW_COLUMN_SIZE,
