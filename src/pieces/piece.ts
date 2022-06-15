@@ -5,11 +5,13 @@ export default class Piece {
   color: team;
   position: Position;
   name: string;
+  hasMoved: boolean;
 
   constructor(color: team, position: Position) {
     this.color = color;
     this.position = position;
     this.name = "piece";
+    this.hasMoved = false;
   }
 
   horizontalMovements(chessBoard: Board, limited = false) {
@@ -166,6 +168,7 @@ export default class Piece {
   }
 
   move(position: Position, chessBoard: Board): Board {
+    this.hasMoved = true;
     const board = Array.from(chessBoard);
     board[this.position.i][this.position.j] = null;
     this.position.i = position.i;
