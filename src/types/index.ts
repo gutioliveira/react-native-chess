@@ -1,3 +1,5 @@
+import Piece from "../pieces/piece";
+
 export type team = "white" | "black";
 
 export type Board = Array<Array<any>>;
@@ -9,10 +11,11 @@ export interface PieceInterface {
 export interface Position {
   i: number;
   j: number;
-  specialMovements?: Array<string>;
+  specialMovements?: Array<SpecialMovement>;
 }
 
 export interface SpecialMovement {
-  type: string;
-  args: any;
+  i: number;
+  j: number;
+  value: Piece | null;
 }

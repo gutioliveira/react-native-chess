@@ -54,20 +54,20 @@ const ChessBoard = () => {
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
     const secondRow = team === "white" ? 7 : 0;
-    // for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
-    //   chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-    //     i: firstRow,
-    //     j: i,
-    //   });
-    // }
-    // PIECES_ORDER.forEach((item, index) => {
-    //   chessBoard[secondRow][index] = pieceFactory(item, team, {
-    //     i: secondRow,
-    //     j: index,
-    //   });
-    // });
-    chessBoard[3][3] = new Pawn('black', {i: 3, j: 3}, true);
-    chessBoard[3][2] = new Pawn('white', {i: 3, j: 2}, false);
+    for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+      chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
+        i: firstRow,
+        j: i,
+      });
+    }
+    PIECES_ORDER.forEach((item, index) => {
+      chessBoard[secondRow][index] = pieceFactory(item, team, {
+        i: secondRow,
+        j: index,
+      });
+    });
+    // chessBoard[3][3] = new Pawn('black', {i: 3, j: 3}, true);
+    // chessBoard[3][2] = new Pawn('white', {i: 3, j: 2}, false);
   };
 
   useEffect(() => {
@@ -88,16 +88,16 @@ const ChessBoard = () => {
   };
 
   const onPiecePress = (i: string, j: string) => {
-    console.log(
-      `I = ${i} J = ${j}`,
-      JSON.stringify(currentPiece),
-      JSON.stringify(greenPositions)
-    );
+    // console.log(
+    //   `I = ${i} J = ${j}`,
+    //   JSON.stringify(currentPiece),
+    //   JSON.stringify(greenPositions)
+    // );
     try {
       if (currentPiece && greenPositions[i][j]) {
         setTurn(turn + 1);
         cancelMovement();
-        console.log('KKKKKK');
+        // console.log('KKKKKK');
         setChessBoard(currentPiece.move(greenPositions[i][j], chessBoard));
       } else {
         cancelMovement();

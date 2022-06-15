@@ -171,10 +171,11 @@ export default class Piece {
     this.position.i = position.i;
     this.position.j = position.j;
     board[position.i][position.j] = this;
-    console.log(`XXXXXX -> move\n\n`)
-    console.log(JSON.stringify(position));
-    console.log(JSON.stringify(this));
-    console.log('\n\n------');
+    if (position.specialMovements){
+      position.specialMovements.forEach((p: SpecialMovement) => {
+        board[p.i][p.j] = p.value;
+      });
+    }
     return board;
   }
 
