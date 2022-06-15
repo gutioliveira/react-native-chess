@@ -1,6 +1,7 @@
 import Piece from "./piece";
 import { team, Position, Board, SpecialMovement } from "../types";
 import { EN_PASSANT, KILL_PASSANT } from "../constants";
+import Queen from "./queen";
 
 export default class Pawn extends Piece {
   enPassant: boolean;
@@ -20,20 +21,46 @@ export default class Pawn extends Piece {
     try {
       console.log(`${i + direction}, ${j}\n`);
       if (chessBoard[i + direction][j] === null) {
-        positions.push({ i: i + direction, j: j, specialMovements: [
-          {i: i + direction, j: j, value: new Pawn(this.color, {i: i + direction, j: j}, false)}
-        ]});
+        const endReached =
+          this.color === "white" ? i + direction === 0 : i + direction === 7;
+        positions.push({
+          i: i + direction,
+          j: j,
+          specialMovements: endReached
+            ? [
+                {
+                  i: i + direction,
+                  j: j,
+                  value: new Queen(this.color, { i: i + direction, j: j }),
+                },
+              ]
+            : [],
+        });
       }
       if (firstMove && chessBoard[i + 2 * direction][j] === null) {
-        positions.push({ i: i + 2 * direction, j: j, specialMovements: [
-          {i: i + 2 * direction, j: j, value: new Pawn(this.color, {i: i + 2 * direction, j: j}, true)}
-        ] });
+        positions.push({ i: i + 2 * direction, j: j });
       }
-      if (chessBoard[i][j+1] !== null && chessBoard[i][j+1].name === this.name && chessBoard[i][j+1].enPassant){
-        positions.push({ i: i + direction, j: j+1, specialMovements: [{i, j: j+1, value: null}]});
+      if (
+        chessBoard[i][j + 1] !== null &&
+        chessBoard[i][j + 1].name === this.name &&
+        chessBoard[i][j + 1].enPassant
+      ) {
+        positions.push({
+          i: i + direction,
+          j: j + 1,
+          specialMovements: [{ i, j: j + 1, value: null }],
+        });
       }
-      if (chessBoard[i][j-1] !== null && chessBoard[i][j-1].name === this.name && chessBoard[i][j-1].enPassant){
-        positions.push({ i: i + direction, j: j-1, specialMovements: [{i, j: j-1, value: null}]});
+      if (
+        chessBoard[i][j - 1] !== null &&
+        chessBoard[i][j - 1].name === this.name &&
+        chessBoard[i][j - 1].enPassant
+      ) {
+        positions.push({
+          i: i + direction,
+          j: j - 1,
+          specialMovements: [{ i, j: j - 1, value: null }],
+        });
       }
     } catch {}
 
@@ -42,7 +69,21 @@ export default class Pawn extends Piece {
         chessBoard[i + direction][j + 1] &&
         chessBoard[i + direction][j + 1].color !== this.color
       ) {
-        positions.push({ j: j + 1, i: i + direction });
+        const endReached =
+          this.color === "white" ? i + direction === 0 : i + direction === 7;
+        positions.push({
+          j: j + 1,
+          i: i + direction,
+          specialMovements: endReached
+            ? [
+                {
+                  i: i + direction,
+                  j: j + 1,
+                  value: new Queen(this.color, { i: i + direction, j: j + 1 }),
+                },
+              ]
+            : [],
+        });
       }
     } catch {}
 
@@ -51,7 +92,21 @@ export default class Pawn extends Piece {
         chessBoard[i + direction][j - 1] &&
         chessBoard[i + direction][j - 1].color !== this.color
       ) {
-        positions.push({ j: j - 1, i: i + direction });
+        const endReached =
+          this.color === "white" ? i + direction === 0 : i + direction === 7;
+        positions.push({
+          j: j - 1,
+          i: i + direction,
+          specialMovements: endReached
+            ? [
+                {
+                  i: i + direction,
+                  j: j - 1,
+                  value: new Queen(this.color, { i: i + direction, j: j - 1 }),
+                },
+              ]
+            : [],
+        });
       }
     } catch {}
 
