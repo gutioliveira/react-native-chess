@@ -335,9 +335,13 @@ class Knight extends Piece {
 }
 
 class Pawn extends Piece {
+
+  enPassant: boolean;
+
   constructor(color: team, position: Position) {
     super(color, position);
     this.name = "Pawn";
+    this.enPassant = false;
   }
 
   pawnMovement(chessBoard: Board): Array<any> {
@@ -350,9 +354,11 @@ class Pawn extends Piece {
       console.log(`${i + direction}, ${j}`);
       if (chessBoard[i + direction][j] === null) {
         positions.push({ i: i + direction, j: j });
+        this.enPassant = false;
       }
       if (firstMove && chessBoard[i + 2 * direction][j] === null) {
         positions.push({ i: i + 2 * direction, j: j });
+        this.enPassant = true;
       }
     } catch {}
 
@@ -393,12 +399,12 @@ const ChessBoard = () => {
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
     const secondRow = team === "white" ? 7 : 0;
-    // for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
-    //   chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-    //     i: firstRow,
-    //     j: i,
-    //   });
-    // }
+    for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+      chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
+        i: firstRow,
+        j: i,
+      });
+    }
     PIECES_ORDER.forEach((item, index) => {
       chessBoard[secondRow][index] = pieceFactory(item, team, {
         i: secondRow,
