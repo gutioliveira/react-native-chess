@@ -9,4 +9,10 @@ export interface PieceInterface {
 export interface Position {
   i: number;
   j: number;
+  specialMovements?: Array<string>;
+}
+
+export interface SpecialMovement {
+  type: string;
+  args: any;
 }

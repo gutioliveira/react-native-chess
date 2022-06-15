@@ -1,4 +1,4 @@
-import { team, Position, Board } from "../types";
+import { team, Position, Board, SpecialMovement } from "../types";
 import { ROW_COLUMN_SIZE } from "../constants";
 
 export default class Piece {
@@ -161,7 +161,22 @@ export default class Piece {
     return positions;
   }
 
-  getAvailableMovements(chessBoard: Board): Array<any> {
+  getAvailableMovements(chessBoard: Board): Array<Position> {
     return [];
   }
+
+  move(position: Position, chessBoard: Board): Board {
+    const board = Array.from(chessBoard);
+    board[this.position.i][this.position.j] = null;
+    this.position.i = position.i;
+    this.position.j = position.j;
+    board[position.i][position.j] = this;
+    console.log(`XXXXXX -> move\n\n`)
+    console.log(JSON.stringify(position));
+    console.log(JSON.stringify(this));
+    console.log('\n\n------');
+    return board;
+  }
+
+  specialMovements(specialMovements: Array<SpecialMovement>): void {}
 }

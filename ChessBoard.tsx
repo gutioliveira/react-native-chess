@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Dimensions, Text, TouchableWithoutFeedback } from "react-native";
 import { ROW_COLUMN_SIZE } from "./src/constants";
 import { pieceFactory } from "./src/factory/piece-factory";
+import Pawn from "./src/pieces/pawn";
 import Piece from "./src/pieces/piece";
-import { Board, PieceInterface, team } from "./src/types";
+import { Board, PieceInterface, Position, team } from "./src/types";
 
 const { width } = Dimensions.get(`window`);
 
@@ -53,18 +54,20 @@ const ChessBoard = () => {
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
     const secondRow = team === "white" ? 7 : 0;
-    for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
-      chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-        i: firstRow,
-        j: i,
-      });
-    }
-    PIECES_ORDER.forEach((item, index) => {
-      chessBoard[secondRow][index] = pieceFactory(item, team, {
-        i: secondRow,
-        j: index,
-      });
-    });
+    // for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+    //   chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
+    //     i: firstRow,
+    //     j: i,
+    //   });
+    // }
+    // PIECES_ORDER.forEach((item, index) => {
+    //   chessBoard[secondRow][index] = pieceFactory(item, team, {
+    //     i: secondRow,
+    //     j: index,
+    //   });
+    // });
+    chessBoard[3][3] = new Pawn('black', {i: 3, j: 3}, true);
+    chessBoard[3][2] = new Pawn('white', {i: 3, j: 2}, false);
   };
 
   useEffect(() => {
@@ -92,18 +95,10 @@ const ChessBoard = () => {
     );
     try {
       if (currentPiece && greenPositions[i][j]) {
-        console.log(`caiu123`);
-        const I = currentPiece.position.i;
-        const J = currentPiece.position.j;
-        const chessBoardCopy = Array.from(chessBoard);
-        chessBoardCopy[I][J] = null;
-        currentPiece.position.i = parseInt(i);
-        currentPiece.position.j = parseInt(j);
-        chessBoardCopy[parseInt(i)][parseInt(j)] = currentPiece;
         setTurn(turn + 1);
-        console.log(`chessBoardCopy`, JSON.stringify(chessBoardCopy));
         cancelMovement();
-        setChessBoard(chessBoardCopy);
+        console.log('KKKKKK');
+        setChessBoard(currentPiece.move(greenPositions[i][j], chessBoard));
       } else {
         cancelMovement();
       }
@@ -116,11 +111,11 @@ const ChessBoard = () => {
     if (piece && COLORS[turn % 2] === piece.color) {
       const gPositions = piece.getAvailableMovements(chessBoard);
       setGreenPositions(
-        gPositions.reduce((acc, currentValue, index, array) => {
+        gPositions.reduce<any>((acc, currentValue, index, array) => {
           if (!acc[currentValue.i]) {
             acc[currentValue.i] = {};
           }
-          acc[currentValue.i][currentValue.j] = true;
+          acc[currentValue.i][currentValue.j] = { i: currentValue.i, j: currentValue.j, specialMovements: currentValue.specialMovements };
           return acc;
         }, {})
       );
@@ -184,6 +179,9 @@ const ChessBoard = () => {
                           {cell.name}
                         </Text>
                       )}
+                      <View style={{position: 'absolute', backgroundColor: 'red', right: 0, bottom: 0}}>
+                        <Text>{`${i} ${j}`}</Text>
+                      </View>
                     </View>
                   </TouchableWithoutFeedback>
                 );

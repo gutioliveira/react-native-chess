@@ -1,28 +1,41 @@
 import Piece from "./piece";
-import { team, Position, Board } from "../types";
+import { team, Position, Board, SpecialMovement } from "../types";
+import { EN_PASSANT } from "../constants";
 
 export default class Pawn extends Piece {
   enPassant: boolean;
 
-  constructor(color: team, position: Position) {
+  constructor(color: team, position: Position, enPassant = false) {
     super(color, position);
     this.name = "Pawn";
-    this.enPassant = false;
+    this.enPassant = enPassant;
   }
 
-  pawnMovement(chessBoard: Board): Array<any> {
+  specialMovements(specialMovements?: Array<SpecialMovement>){
+    if (specialMovements){
+      specialMovements.forEach((specialMovement) => {
+        if (specialMovement.type === EN_PASSANT){
+          this.enPassant = true;
+        }
+      });
+    } else {
+      this.enPassant = false;
+    }
+  }
+
+  pawnMovement(chessBoard: Board): Array<Position> {
     const direction = this.color === "white" ? -1 : 1;
     const { i, j } = this.position;
     const firstMove = this.color === "white" ? i === 6 : i === 1;
-    const positions = [];
+    const positions: Position[] = [];
     console.log(`firstMove ${firstMove}`);
     try {
-      console.log(`${i + direction}, ${j}`);
+      console.log(`${i + direction}, ${j}\n`);
       if (chessBoard[i + direction][j] === null) {
         positions.push({ i: i + direction, j: j });
       }
       if (firstMove && chessBoard[i + 2 * direction][j] === null) {
-        positions.push({ i: i + 2 * direction, j: j });
+        positions.push({ i: i + 2 * direction, j: j, specialMovements: [EN_PASSANT] });
       }
     } catch {}
 
