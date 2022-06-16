@@ -41,7 +41,16 @@ const KING: PieceInterface = {
   name: "king",
 };
 
-const PIECES_ORDER = [ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK];
+const PIECES_ORDER = [
+  ROOK,
+  KNIGHT, // KNIGHT, 
+  null, // BISHOP, 
+  null, // QUEEN, 
+  KING, 
+  null, // BISHOP, 
+  null, // KNIGHT, 
+  ROOK
+];
 
 const COLORS = ["white", "black"];
 
@@ -52,22 +61,22 @@ const ChessBoard = () => {
   const [turn, setTurn] = useState(1);
 
   const fillPieces = (team: team, chessBoard: Board) => {
-    // const firstRow = team === "white" ? 6 : 1;
-    // const secondRow = team === "white" ? 7 : 0;
-    // for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
-    //   chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
-    //     i: firstRow,
-    //     j: i,
-    //   });
-    // }
-    // PIECES_ORDER.forEach((item, index) => {
-    //   chessBoard[secondRow][index] = pieceFactory(item, team, {
-    //     i: secondRow,
-    //     j: index,
-    //   });
-    // });
-    chessBoard[7][2] = new Pawn('white', {i: 7, j: 2}, true);
-    chessBoard[6][1] = new Pawn('black', {i: 6, j: 1}, false);
+    const firstRow = team === "white" ? 6 : 1;
+    const secondRow = team === "white" ? 7 : 0;
+    for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+      chessBoard[firstRow][i] = pieceFactory(PAWNS, team, {
+        i: firstRow,
+        j: i,
+      });
+    }
+    PIECES_ORDER.forEach((item, index) => {
+      chessBoard[secondRow][index] = item ? pieceFactory(item, team, {
+        i: secondRow,
+        j: index,
+      }) : null;
+    });
+    // chessBoard[7][2] = new Pawn('white', {i: 7, j: 2}, true);
+    // chessBoard[6][1] = new Pawn('black', {i: 6, j: 1}, false);
   };
 
   useEffect(() => {
