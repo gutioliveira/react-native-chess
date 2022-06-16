@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Dimensions, Text, TouchableWithoutFeedback } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Animated,
+  View,
+  Dimensions,
+  Text,
+  TouchableWithoutFeedback,
+  PanResponder,
+} from "react-native";
 import { ROW_COLUMN_SIZE } from "./src/constants";
 import { pieceFactory } from "./src/factory/piece-factory";
 import Pawn from "./src/pieces/pawn";
@@ -43,19 +50,20 @@ const KING: PieceInterface = {
 
 const PIECES_ORDER = [
   ROOK,
-  KNIGHT, // KNIGHT, 
-  null, // BISHOP, 
-  null, // QUEEN, 
-  KING, 
-  null, // BISHOP, 
-  null, // KNIGHT, 
-  ROOK
+  KNIGHT, // KNIGHT,
+  BISHOP, // BISHOP,
+  QUEEN, // QUEEN,
+  KING,
+  BISHOP, // BISHOP,
+  KNIGHT, // KNIGHT,
+  ROOK,
 ];
 
 const COLORS = ["white", "black"];
 
 const ChessBoard = () => {
   const [chessBoard, setChessBoard] = useState<Board>([]);
+  const [panBoard, setPanBoard] = useState<Board>([[]]);
   const [greenPositions, setGreenPositions] = useState<any>({});
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
   const [turn, setTurn] = useState(1);
@@ -70,26 +78,80 @@ const ChessBoard = () => {
       });
     }
     PIECES_ORDER.forEach((item, index) => {
-      chessBoard[secondRow][index] = item ? pieceFactory(item, team, {
-        i: secondRow,
-        j: index,
-      }) : null;
+      chessBoard[secondRow][index] = item
+        ? pieceFactory(item, team, {
+            i: secondRow,
+            j: index,
+          })
+        : null;
     });
     // chessBoard[7][2] = new Pawn('white', {i: 7, j: 2}, true);
     // chessBoard[6][1] = new Pawn('black', {i: 6, j: 1}, false);
   };
 
   useEffect(() => {
-    let c = [];
+    const c = [];
+    const p = [];
     for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
       c.push(new Array(ROW_COLUMN_SIZE).fill(null));
+      p.push(new Array(ROW_COLUMN_SIZE).fill(null));
     }
     fillPieces("white", c);
     fillPieces("black", c);
     setChessBoard(c);
+    setPanBoard(p);
   }, []);
 
-  console.log(JSON.stringify(chessBoard));
+  useEffect(() => {
+    if (chessBoard.length === 8) {
+      const panBoardLocal: any[] = [
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+      ];
+      for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
+        for (let j = 0; j < ROW_COLUMN_SIZE; j++) {
+          console.log(`chessBoard123[${i}][${j}]`);
+          console.log(chessBoard[i][j]);
+          if (chessBoard[i][j] !== null) {
+            console.log('caiu')
+            const pan = new Animated.ValueXY();
+            // panBoardLocal[i][j] = 0;
+            panBoardLocal[i][j] = {
+              pan,
+              panResponder: PanResponder.create({
+                onStartShouldSetPanResponder: () => true,
+                onPanResponderMove: Animated.event([
+                  null,
+                  {
+                    dx: pan.x, // x,y are Animated.Value
+                    dy: pan.y,
+                  },
+                ]),
+                onPanResponderRelease: () => {
+                  Animated.spring(
+                    pan, // Auto-multiplexed
+                    {
+                      toValue: { x: 0, y: 0 },
+                      useNativeDriver: false,
+                    } // Back to zero
+                  ).start();
+                },
+              }),
+            };
+          }
+          console.log(JSON.stringify(panBoardLocal[i][j]));
+        }
+      }
+      console.log(`XXXX123 ${JSON.stringify(panBoardLocal)}`);
+      setPanBoard(panBoardLocal);
+    }
+  }, [chessBoard]);
 
   const cancelMovement = () => {
     setCurrentPiece(null);
@@ -124,13 +186,21 @@ const ChessBoard = () => {
           if (!acc[currentValue.i]) {
             acc[currentValue.i] = {};
           }
-          acc[currentValue.i][currentValue.j] = { i: currentValue.i, j: currentValue.j, specialMovements: currentValue.specialMovements };
+          acc[currentValue.i][currentValue.j] = {
+            i: currentValue.i,
+            j: currentValue.j,
+            specialMovements: currentValue.specialMovements,
+          };
           return acc;
         }, {})
       );
       setCurrentPiece(piece);
     }
   };
+
+  // if (!panBoard[0][0]) return null;
+
+  console.log(`panREsponder ${panBoard[0][0] ? "true" : "false"}`);
 
   return (
     <>
@@ -152,7 +222,7 @@ const ChessBoard = () => {
         {chessBoard.map((item: any, i: number) => {
           let color = i % 2;
           return (
-            <View style={{ flexDirection: "row" }}>
+            <View key={`ROW_${i}`} style={{ flexDirection: "row" }}>
               {item.map((cell: Piece, j: number) => {
                 // console.log(`CELL ${JSON.stringify(cell)}`);
                 let backgroundColor =
@@ -165,34 +235,63 @@ const ChessBoard = () => {
                 } catch (e) {}
 
                 return (
-                  <TouchableWithoutFeedback
-                    onLongPress={() => onLongPress(cell)}
-                    onPress={() => onPiecePress(i.toString(), j.toString())}
-                  >
-                    <View
-                      style={{
+                  // <TouchableWithoutFeedback
+                  //   onLongPress={() => onLongPress(cell)}
+                  //   onPress={() => onPiecePress(i.toString(), j.toString())}
+                  // >
+                  <View
+                    key={`COLUMN_${i}_${j}_${
+                      panBoard[i][j] ? "panBoard" : "noPanBoard"
+                    }`}
+                    style={[
+                      {
                         width: width / ROW_COLUMN_SIZE,
                         height: width / ROW_COLUMN_SIZE,
                         backgroundColor,
                         alignItems: "center",
                         justifyContent: "center",
+                      },
+                    ]}
+                  >
+                    {cell &&
+                      (panBoard[i][j] ? (
+                        <Animated.View
+                          {...panBoard[i][j].panResponder.panHandlers}
+                          style={[panBoard[i][j].pan.getLayout()]}
+                        >
+                          <Text
+                            style={{
+                              backgroundColor: cell.color,
+                              color: cell.color === "black" ? "green" : "blue",
+                            }}
+                          >
+                            {cell.name}
+                          </Text>
+                        </Animated.View>
+                      ) : (
+                        <View>
+                          <Text
+                            style={{
+                              backgroundColor: cell.color,
+                              color: cell.color === "black" ? "grey" : "black",
+                            }}
+                          >
+                            {cell.name}
+                          </Text>
+                        </View>
+                      ))}
+                    <View
+                      style={{
+                        position: "absolute",
+                        backgroundColor: "red",
+                        right: 0,
+                        bottom: 0,
                       }}
                     >
-                      {cell && (
-                        <Text
-                          style={{
-                            backgroundColor: cell.color,
-                            color: cell.color === "black" ? "white" : "black",
-                          }}
-                        >
-                          {cell.name}
-                        </Text>
-                      )}
-                      <View style={{position: 'absolute', backgroundColor: 'red', right: 0, bottom: 0}}>
-                        <Text>{`${i} ${j}`}</Text>
-                      </View>
+                      <Text>{`${i} ${j}`}</Text>
                     </View>
-                  </TouchableWithoutFeedback>
+                  </View>
+                  // </TouchableWithoutFeedback>
                 );
               })}
             </View>
