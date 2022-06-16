@@ -13,7 +13,7 @@ import Pawn from "./src/pieces/pawn";
 import Piece from "./src/pieces/piece";
 import { Board, PieceInterface, Position, team } from "./src/types";
 
-const { width } = Dimensions.get(`window`);
+const { width, height } = Dimensions.get(`window`);
 
 const styles = {
   container: {
@@ -66,7 +66,9 @@ const ChessBoard = () => {
   const [panBoard, setPanBoard] = useState<Board>([[]]);
   const [greenPositions, setGreenPositions] = useState<any>({});
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
-  const [turn, setTurn] = useState(1);
+  const [turn, setTurn] = useState(0);
+
+  const whoseTurn = turn % 2 === 0 ? "white" : "black";
 
   const fillPieces = (team: team, chessBoard: Board) => {
     const firstRow = team === "white" ? 6 : 1;
@@ -87,6 +89,19 @@ const ChessBoard = () => {
     });
     // chessBoard[7][2] = new Pawn('white', {i: 7, j: 2}, true);
     // chessBoard[6][1] = new Pawn('black', {i: 6, j: 1}, false);
+  };
+
+  const getReleaseSquare = (moveX: number, moveY: number): boolean => {
+    const squareSize = width / ROW_COLUMN_SIZE;
+    const boardWidth = squareSize * ROW_COLUMN_SIZE;
+    const yRangeMin = (height - boardWidth) / 2.0;
+    const yRangeMax = yRangeMin + boardWidth;
+    const isOnBoard = moveY >= yRangeMin && moveY <= yRangeMax;
+    if (isOnBoard) {
+      onPiecePress(Math.floor((moveY - yRangeMin) / squareSize).toString(), Math.floor(moveX/squareSize).toString())
+      return true;
+    }
+    return false;
   };
 
   useEffect(() => {
@@ -118,14 +133,20 @@ const ChessBoard = () => {
         for (let j = 0; j < ROW_COLUMN_SIZE; j++) {
           console.log(`chessBoard123[${i}][${j}]`);
           console.log(chessBoard[i][j]);
-          if (chessBoard[i][j] !== null) {
-            console.log('caiu')
+          if (
+            chessBoard[i][j] !== null &&
+            chessBoard[i][j].color === whoseTurn
+          ) {
+            console.log("caiu");
             const pan = new Animated.ValueXY();
             // panBoardLocal[i][j] = 0;
             panBoardLocal[i][j] = {
               pan,
               panResponder: PanResponder.create({
                 onStartShouldSetPanResponder: () => true,
+                onPanResponderStart: () => {
+                  onLongPress(chessBoard[i][j]);
+                },
                 onPanResponderMove: Animated.event([
                   null,
                   {
@@ -133,14 +154,24 @@ const ChessBoard = () => {
                     dy: pan.y,
                   },
                 ]),
-                onPanResponderRelease: () => {
-                  Animated.spring(
-                    pan, // Auto-multiplexed
-                    {
-                      toValue: { x: 0, y: 0 },
-                      useNativeDriver: false,
-                    } // Back to zero
-                  ).start();
+                onPanResponderRelease: (evt, gestureState) => {
+                  // console.log('onPanResponderRelease', evt);
+                  console.log(
+                    "onPanResponderRelease",
+                    JSON.stringify(gestureState)
+                  );
+                  if (
+                    getReleaseSquare(gestureState.moveX, gestureState.moveY)
+                  ) {
+                    cancelMovement();
+                    Animated.spring(
+                      pan, // Auto-multiplexed
+                      {
+                        toValue: { x: 0, y: 0 },
+                        useNativeDriver: false,
+                      } // Back to zero
+                    ).start();
+                  }
                 },
               }),
             };
@@ -159,6 +190,7 @@ const ChessBoard = () => {
   };
 
   const onPiecePress = (i: string, j: string) => {
+    console.log(`onPiecePress ${i} ${j} => ${currentPiece}`, JSON.stringify(greenPositions));
     // console.log(
     //   `I = ${i} J = ${j}`,
     //   JSON.stringify(currentPiece),
@@ -168,7 +200,7 @@ const ChessBoard = () => {
       if (currentPiece && greenPositions[i][j]) {
         setTurn(turn + 1);
         cancelMovement();
-        // console.log('KKKKKK');
+        console.log('KKKKKK');
         setChessBoard(currentPiece.move(greenPositions[i][j], chessBoard));
       } else {
         cancelMovement();
@@ -200,7 +232,7 @@ const ChessBoard = () => {
 
   // if (!panBoard[0][0]) return null;
 
-  console.log(`panREsponder ${panBoard[0][0] ? "true" : "false"}`);
+  console.log(`panREsponder ${width / ROW_COLUMN_SIZE} ${height}`);
 
   return (
     <>
@@ -222,7 +254,7 @@ const ChessBoard = () => {
         {chessBoard.map((item: any, i: number) => {
           let color = i % 2;
           return (
-            <View key={`ROW_${i}`} style={{ flexDirection: "row" }}>
+            <View key={`ROW_${i}_${turn}`} style={{ flexDirection: "row" }}>
               {item.map((cell: Piece, j: number) => {
                 // console.log(`CELL ${JSON.stringify(cell)}`);
                 let backgroundColor =
@@ -240,9 +272,7 @@ const ChessBoard = () => {
                   //   onPress={() => onPiecePress(i.toString(), j.toString())}
                   // >
                   <View
-                    key={`COLUMN_${i}_${j}_${
-                      panBoard[i][j] ? "panBoard" : "noPanBoard"
-                    }`}
+                    key={`COLUMN_${i}_${j}_${panBoard[i][j] ? "panBoard" : "noPanBoard"}_${turn}`}
                     style={[
                       {
                         width: width / ROW_COLUMN_SIZE,
