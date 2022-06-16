@@ -4,7 +4,6 @@ import {
   View,
   Dimensions,
   Text,
-  TouchableWithoutFeedback,
   PanResponder,
 } from "react-native";
 import { ROW_COLUMN_SIZE } from "./src/constants";
@@ -87,8 +86,6 @@ const ChessBoard = () => {
           })
         : null;
     });
-    // chessBoard[7][2] = new Pawn('white', {i: 7, j: 2}, true);
-    // chessBoard[6][1] = new Pawn('black', {i: 6, j: 1}, false);
   };
 
   const getReleaseSquare = (moveX: number, moveY: number): boolean => {
@@ -131,15 +128,11 @@ const ChessBoard = () => {
       ];
       for (let i = 0; i < ROW_COLUMN_SIZE; i++) {
         for (let j = 0; j < ROW_COLUMN_SIZE; j++) {
-          console.log(`chessBoard123[${i}][${j}]`);
-          console.log(chessBoard[i][j]);
           if (
             chessBoard[i][j] !== null &&
             chessBoard[i][j].color === whoseTurn
           ) {
-            console.log("caiu");
             const pan = new Animated.ValueXY();
-            // panBoardLocal[i][j] = 0;
             panBoardLocal[i][j] = {
               pan,
               panResponder: PanResponder.create({
@@ -155,11 +148,6 @@ const ChessBoard = () => {
                   },
                 ]),
                 onPanResponderRelease: (evt, gestureState) => {
-                  // console.log('onPanResponderRelease', evt);
-                  console.log(
-                    "onPanResponderRelease",
-                    JSON.stringify(currentPiece)
-                  );
                   if (
                     getReleaseSquare(gestureState.moveX, gestureState.moveY)
                   ) {
@@ -176,32 +164,22 @@ const ChessBoard = () => {
               }),
             };
           }
-          console.log(JSON.stringify(panBoardLocal[i][j]));
         }
       }
-      console.log(`XXXX123 ${JSON.stringify(panBoardLocal)}`);
       setPanBoard(panBoardLocal);
     }
   }, [chessBoard, currentPiece]);
 
   const cancelMovement = () => {
-    console.log('cancelMovement!!!!');
     setCurrentPiece(null);
     setGreenPositions({});
   };
 
   const onPiecePress = (i: string, j: string) => {
-    console.log(`onPiecePress ${i} ${j} => ${currentPiece}`, JSON.stringify(greenPositions));
-    // console.log(
-    //   `I = ${i} J = ${j}`,
-    //   JSON.stringify(currentPiece),
-    //   JSON.stringify(greenPositions)
-    // );
     try {
       if (currentPiece && greenPositions[i][j]) {
         setTurn(turn + 1);
         cancelMovement();
-        console.log('KKKKKK');
         setChessBoard(currentPiece.move(greenPositions[i][j], chessBoard));
       } else {
         cancelMovement();
@@ -231,10 +209,6 @@ const ChessBoard = () => {
     }
   };
 
-  // if (!panBoard[0][0]) return null;
-
-  console.log(`currentPiece`, JSON.stringify(currentPiece));
-
   return (
     <>
       {
@@ -257,7 +231,6 @@ const ChessBoard = () => {
           return (
             <View key={`ROW_${i}_${turn}`} style={{ flexDirection: "row" }}>
               {item.map((cell: Piece, j: number) => {
-                // console.log(`CELL ${JSON.stringify(cell)}`);
                 let backgroundColor =
                   j === 0 ? COLORS[color] : COLORS[(color + j) % 2];
 
@@ -268,10 +241,6 @@ const ChessBoard = () => {
                 } catch (e) {}
 
                 return (
-                  // <TouchableWithoutFeedback
-                  //   onLongPress={() => onLongPress(cell)}
-                  //   onPress={() => onPiecePress(i.toString(), j.toString())}
-                  // >
                   <View
                     key={`COLUMN_${i}_${j}_${panBoard[i][j] ? "panBoard" : "noPanBoard"}_${turn}`}
                     style={[
@@ -322,7 +291,6 @@ const ChessBoard = () => {
                       <Text>{`${i} ${j}`}</Text>
                     </View>
                   </View>
-                  // </TouchableWithoutFeedback>
                 );
               })}
             </View>
