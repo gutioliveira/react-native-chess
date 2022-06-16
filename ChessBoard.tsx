@@ -158,7 +158,7 @@ const ChessBoard = () => {
                   // console.log('onPanResponderRelease', evt);
                   console.log(
                     "onPanResponderRelease",
-                    JSON.stringify(gestureState)
+                    JSON.stringify(currentPiece)
                   );
                   if (
                     getReleaseSquare(gestureState.moveX, gestureState.moveY)
@@ -182,9 +182,10 @@ const ChessBoard = () => {
       console.log(`XXXX123 ${JSON.stringify(panBoardLocal)}`);
       setPanBoard(panBoardLocal);
     }
-  }, [chessBoard]);
+  }, [chessBoard, currentPiece]);
 
   const cancelMovement = () => {
+    console.log('cancelMovement!!!!');
     setCurrentPiece(null);
     setGreenPositions({});
   };
@@ -232,7 +233,7 @@ const ChessBoard = () => {
 
   // if (!panBoard[0][0]) return null;
 
-  console.log(`panREsponder ${width / ROW_COLUMN_SIZE} ${height}`);
+  console.log(`currentPiece`, JSON.stringify(currentPiece));
 
   return (
     <>
